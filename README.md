@@ -10,11 +10,11 @@ Implemented crossover methods:
 - uniform crossover
 - one-point crossover
 
-Chart presenting change of maximum fitness function value and average fitness function value in each generation.
-Fitness function: sum of bits in genome.
-Population: 16
-Genotype length: 20
-Probability of mutation: 0.01
-Probability of crossing: 0.7
-Number of generations: 100
+Chart presenting change of maximum fitness function value and average fitness function value in each generation.<br />
+Fitness function: sum of bits in genome.<br />
+Population: 16<br />
+Genotype length: 20<br />
+Probability of mutation: 0.01<br />
+Probability of crossing: 0.7<br />
+Number of generations: 100<br />
 ![](fitness_values.png)
