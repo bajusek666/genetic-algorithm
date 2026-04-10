@@ -7,7 +7,7 @@ m = 16; % Liczba osobników
 l = 20; % Długość genomu
 pc = 0.7; % prawdopodobieństwo krzyżowania
 pm = 0.01; % Prawdopodobieństwo mutacji bitu
-lg = 100; % Liczba generacji
+lg = 30; % Liczba generacji
 a = 0;
 b = 2.4;
 
@@ -39,9 +39,11 @@ for i = 0:lg
     disp(Ps);
 
     %Krzyżowanie
-    Ps = uniform_crossover(Ps, pc);
+    Ps = one_point_crossover(Ps, pc);
     disp("Osobniki po krzyżowaniu")
     disp(Ps)
+
+    Ps = uniform_crossover(Ps, pc);
 
     %Mutacja
     Ps = mutate(Ps, pm);
@@ -117,12 +119,12 @@ function Ps = one_point_crossover(Ps, pc)
     l = size(Ps, 2);
 
     for i = 1:m 
-        if rand() < pc
-            first = randi(m);
-            second = randi(m);
+        first = randi(m);
+        second = randi(m);
 
-            k = randi(l);
-            Ps([first, second], k:end) = Ps([second, first], k:end);
+        if rand() < pc
+           k = randi(l);
+           Ps([first, second], k:end) = Ps([second, first], k:end);
         end
     end
 end
@@ -135,22 +137,14 @@ function Ps = uniform_crossover(Ps, pc)
     l = size(Ps, 2);
 
     for i = 1:m
-        if rand() < pc
-            mask = randi([0, 1], 1, l)
-            % Negacja maski pozwala na łatwiejsze przemnożenie przez indexy
-            % które mają zostać zamieniane.
-            mask = ~mask
-            mask_indexes = 1:l
-            mask_indexes = mask .* mask_indexes
-            mask_indexes = nonzeros(mask_indexes)
-            
-            first = randi(m)
-            second = randi(m)
+        mask = randi([0, 1], 1, l)
+        mask_indexes = 1:l
+        mask_indexes = mask .* mask_indexes
+        
+        first = randi(m);
+        second = randi(m);
 
-            disp(Ps)
-   
-            Ps([first, second], mask_indexes) = Ps([second, first], mask_indexes)
-        end
+        Ps([first, second], mask_indexes) = Ps
     end
 end
 

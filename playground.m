@@ -27,6 +27,15 @@ disp(weights');
 xd_matrix = binary_population * weights';
 disp(xd_matrix);
 
+%
+disp(size(xd_matrix));
+matrix = [1,2,3;4,5,6];
+disp(matrix)
+matrix = matrix'
+matrix = matrix'
+
+
+
 suma_jakosci = sum(xd_matrix);
 Pi = xd_matrix ./ suma_jakosci;
 disp(Pi)
@@ -48,3 +57,34 @@ for i = 1:n
 end
 
 disp(selectedIndividual)
+
+%Selekcja rzędów i kolumn z macierzy;
+
+random_matrix = randi([0,10], 5, 5);
+disp(random_matrix)
+
+disp(random_matrix(5, :));
+
+%Swap wierszy, zamiana wierszy
+% PS = [1,2,3,4; 5,6,7,8; 0,0,0,0];
+disp(PS)
+k = 2;
+first = 1;
+second = 3;
+
+PS([first, second], k:end) = PS([second, first], k:end)
+disp(PS)
+
+%Maskowanie 
+PS = [1,1,1,1; 2,2,2,2; 3,3,3,3];
+mask = randi([0, 1], 1, l)
+mask = ~mask
+mask_indexes = 1:l
+mask_indexes = mask .* mask_indexes
+mask_indexes = nonzeros(mask_indexes)
+        
+first = randi(m)
+second = randi(m)
+disp(PS)
+PS([first, second], mask_indexes) = PS([second, first], mask_indexes);
+disp(PS)
