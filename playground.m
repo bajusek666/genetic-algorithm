@@ -67,24 +67,31 @@ disp(random_matrix(5, :));
 
 %Swap wierszy, zamiana wierszy
 % PS = [1,2,3,4; 5,6,7,8; 0,0,0,0];
-disp(PS)
+
 k = 2;
 first = 1;
 second = 3;
 
-PS([first, second], k:end) = PS([second, first], k:end)
-disp(PS)
-
 %Maskowanie 
-PS = [1,1,1,1; 2,2,2,2; 3,3,3,3];
-mask = randi([0, 1], 1, l)
-mask = ~mask
-mask_indexes = 1:l
-mask_indexes = mask .* mask_indexes
-mask_indexes = nonzeros(mask_indexes)
-        
-first = randi(m)
-second = randi(m)
-disp(PS)
-PS([first, second], mask_indexes) = PS([second, first], mask_indexes);
-disp(PS)
+% PS = [1,1,1,1; 2,2,2,2; 3,3,3,3];
+% mask = randi([0, 1], 1, l)
+% mask = ~mask
+% mask_indexes = 1:l
+% mask_indexes = mask .* mask_indexes
+% mask_indexes = nonzeros(mask_indexes)
+
+arr = [1,2,3,4,5];
+disp(length(arr));
+
+z = peaks(25);
+surf(z);
+
+[X,Y] = meshgrid(1:0.5:10, 1:20);
+disp(X)
+Z = sin(X) + cos(X)
+
+fit_fun_2 = @(x1,x2) ((25 - (x1 - 5).^2 ) .* cos(2 .* (x1 - 5))) + ((25 - (x2 - 5).^2) .* cos(2 .* (x2 - 5))) + 50;
+X1 = linspace(0,10,100)
+X2 = linspace(0,10,100)'
+Y = fit_fun_2(X1, X2)
+surf(Y)

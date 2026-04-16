@@ -4,16 +4,19 @@
 % Inicjaliacja parametrów 
 
 m = 16; % Liczba osobników
-l = 20; % Długość genomu
+sub_genomes = [10,10]; % Długość poszczególnych podciągów (kolejnych zmiennych reprezentowanych przez genom)
+l = sum(sub_genomes);
 pc = 0.7; % prawdopodobieństwo krzyżowania
 pm = 0.01; % Prawdopodobieństwo mutacji bitu
 lg = 100; % Liczba generacji
 a = 0;
-b = 2.4;
+b = 10;
 
-% Funckja przystosowania
+% Funckje przystosowania
 fit_fun = @(x) x + sin(3 + cos(5 * x)) + 0.8;
-
+fit_fun_2 = @(x1,x2) ((25 - (x1 - 5)^2 ) * cos(2 * (x1 - 5))) + ((25 - (x2 - 5)^2) * cos(2 * (x2 - 5))) + 50;
+fit_fun_2_m = @(M) ((25 - (M(:,1) - 5).^2 ) .* cos(2 .* (M(:,1) - 5))) + ((25 - (M(:,2) - 5).^2) .* cos(2 .* (M(:,2) - 5))) + 50;
+fit_fun_2_mesh = @(x1,x2) ((25 - (x1 - 5).^2 ) .* cos(2 .* (x1 - 5))) + ((25 - (x2 - 5).^2) .* cos(2 .* (x2 - 5))) + 50;
 % Początkowa macierz binarna
 P0 = randi([0,1], m, l)
 Pi = P0;
@@ -22,31 +25,26 @@ mean_fit_values = []
 max_fit_values = []
 
 for i = 0:lg
+
     % Dekodowanie populacji
-    Pi_r = decode_population(Pi, a, b);
-    disp("Zdekodowana populacja") ;
-    disp(Pi_r);
+    disp("Zdekodowana populacja");
+    Pi_r = decode_n_dim_population(Pi, a, b, sub_genomes)
 
     % Obliczenie funckji celu
-    fitness = arrayfun(fit_fun, Pi_r);
     disp("Wektor funkcji przystosowania");
-    disp(fitness);
-    
+    fitness = fit_fun_2_m(Pi_r)
 
     % Selekcja
-    Ps = spinning_wheel_selection(fitness, Pi);
     disp("Wybrane osobniki");
-    disp(Ps);
+    Ps = spinning_wheel_selection(fitness, Pi)
 
     %Krzyżowanie
-    Ps = uniform_crossover(Ps, pc);
-    disp("Osobniki po krzyżowaniu")
-    disp(Ps)
+    disp("Osobniki po krzyżowaniu");
+    Ps = uniform_crossover(Ps, pc)
 
     %Mutacja
-    Ps = mutate(Ps, pm);
-    disp("Osobniki po mutacji")
-    disp(Ps)
+    disp("Osobniki po mutacji");
+    Ps = mutate(Ps, pm)
 
     max_fit_values = [max_fit_values ,max(fitness)];
     mean_fit_values = [mean_fit_values ,mean(fitness)];
@@ -67,6 +65,22 @@ function xr_vector = decode_population(binary_population, a, b)
     weights = 2 .^ powers; 
     xd_vector = binary_population * weights'; 
     xr_vector = a + xd_vector .* (b - a) ./ (2^L - 1);
+end
+
+% Dekodowanie n wymiarowej populacji, podział łańcuchów na n genotypów i konersja każdego podłańcucha do przedziału [a,b]
+% binary_population - genotyp
+% a - dolna granica wartości na jaki ma być dekodowany genotyp
+% b - górna granica wartości na jaki ma być dekodowany genotyp 
+% sub_gens - dłiugości podciągów genotypu
+function xr_matrix = decode_n_dim_population(binary_population, a, b, sub_gens)
+    xr_matrix = [];    
+    from = 0;
+    to = 0;
+    for i = 1:length(sub_gens)
+        from = to + 1;
+        to = to + sub_gens(i);
+        xr_matrix = [xr_matrix, decode_population(binary_population(:, from:to), a, b)];
+    end
 end
 
 % Selekcję proporcjonalna / spinning wheel selection
