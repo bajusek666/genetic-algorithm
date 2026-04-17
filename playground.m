@@ -94,4 +94,11 @@ fit_fun_2 = @(x1,x2) ((25 - (x1 - 5).^2 ) .* cos(2 .* (x1 - 5))) + ((25 - (x2 - 
 X1 = linspace(0,10,100)
 X2 = linspace(0,10,100)'
 Y = fit_fun_2(X1, X2)
-surf(Y)
+figure;
+surf(X1, X2, Y)
+hold on;
+
+x = [1,2,3]
+y = [2,3,4]
+z = [5,5,5]
+scatter3(x,y,z)

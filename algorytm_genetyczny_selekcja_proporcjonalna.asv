@@ -4,11 +4,11 @@
 % Inicjaliacja parametrów 
 
 m = 16; % Liczba osobników
-sub_genomes = [20,20]; % Długość poszczególnych podciągów (kolejnych zmiennych reprezentowanych przez genom)
+sub_genomes = [10,10]; % Długość poszczególnych podciągów (kolejnych zmiennych reprezentowanych przez genom)
 l = sum(sub_genomes);
 pc = 0.7; % prawdopodobieństwo krzyżowania
 pm = 0.01; % Prawdopodobieństwo mutacji bitu
-lg = 200; % Liczba generacji
+lg = 100; % Liczba generacji
 a = 0;
 b = 10;
 
@@ -26,9 +26,9 @@ X1 = linspace(0,10,100);
 X2 = linspace(0,10,100)';
 Y = fit_fun_2_mesh(X1, X2);
 figure;
-surf(X1, X2, Y, EdgeColor="none", FaceAlpha=0.5);
+surf(X1, X2, Y, EdgeColor=n);
 hold on;
-s3d = scatter3([], [], [], 75, 'filled', 'MarkerFaceColor', 'b', SizeData=200);
+s3d = scatter3([], [], [], 75, 'filled', 'MarkerFaceColor', 'b', SizeData=150);
 
 mean_fit_values = []
 max_fit_values = []
@@ -213,7 +213,6 @@ function plot_3d_population(decoded_population, fitness, scatter)
     scatter.YData = decoded_population(:,2);
     scatter.ZData = fitness;
 
-    pause(0.1);
-    
+    pause(0.2);
     drawnow limitrate;
 end
