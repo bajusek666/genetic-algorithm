@@ -11,27 +11,88 @@ pm = 0.01; % Prawdopodobieństwo mutacji bitu
 lg = 100; % Liczba generacji
 a = 0;
 b = 10;
+n = 2; % Wymiarowość przestrzeni poszukiwań
+sigma = 0.01 % Odchylnie standardowe rozdkłądu Normalnego
 
 % Funckje przystosowania
 fit_fun = @(x) x + sin(3 + cos(5 * x)) + 0.8;
 fit_fun_2 = @(x1,x2) ((25 - (x1 - 5)^2 ) * cos(2 * (x1 - 5))) + ((25 - (x2 - 5)^2) * cos(2 * (x2 - 5))) + 50;
 fit_fun_2_m = @(M) ((25 - (M(:,1) - 5).^2 ) .* cos(2 .* (M(:,1) - 5))) + ((25 - (M(:,2) - 5).^2) .* cos(2 .* (M(:,2) - 5))) + 50;
 fit_fun_2_mesh = @(x1,x2) ((25 - (x1 - 5).^2 ) .* cos(2 .* (x1 - 5))) + ((25 - (x2 - 5).^2) .* cos(2 .* (x2 - 5))) + 50;
-% Początkowa macierz binarna
-P0 = randi([0,1], m, l)
-Pi = P0;
+
+% Początkowa macierz binarna, jednakowa populacja początkowa dla 
+rng_seed = rng;
+rng(100);
+P0 = randi([0,1], m, l);
+P0_initial = P0;
+rng(rng_seed);
 
 % Rysowaie przestrzeni rozwiązań
 X1 = linspace(0,10,100);
 X2 = linspace(0,10,100)';
 Y = fit_fun_2_mesh(X1, X2);
 figure;
-surf(X1, X2, Y, EdgeColor=n);
+surf(X1, X2, Y, EdgeColor="none", FaceAlpha=0.5);
 hold on;
-s3d = scatter3([], [], [], 75, 'filled', 'MarkerFaceColor', 'b', SizeData=150);
+s3d = scatter3([], [], [], 75, 'filled', 'MarkerFaceColor', 'b', SizeData=200);
+
+
+% Parametry eksperymentu
+m_values = [10, 20, 40];
+pc_values = [0.25, 0.5, 0.75, 1];
+pm_values = [0.01, 0.05, 0.001];
+
+num_runs = 30;
+colors = ["r", "g", "b", "m"];
+
+figure;
+hold on;
+
+    % Inicjalizacja macierzy na wyniki z 15 uruchomień
+    % Każdy wiersz to jedno uruchomienie, każda kolumna to generacja
+    all_max_runs = zeros(num_runs, lg + 1);
+    all_mean_runs = zeros(num_runs, lg + 1);
+
+    for run = 1:num_runs
+
+        current_max = [];
+        current_mean = [];
+        Pi = P0;
+
+        for i = 0:lg
+            Pi_r = decode_n_dim_population(Pi, a, b, sub_genomes);
+            fitness = fit_fun_2_m(Pi_r);
+            current_max = [current_max, max(fitness)];
+            current_mean = [current_mean, mean(fitness)];
+            Ps = spinning_wheel_selection(fitness, Pi);
+            Ps = uniform_crossover(Ps, pc);
+            Ps = mutate(Ps, pm);
+            Pi = Ps;
+        end
+
+        all_max_runs(run, :) = current_max;
+        all_mean_runs(run, :) = current_mean;
+    end
+
+    % Uśrednianie wyników po 15 iteracjach
+    avg_max_fit = mean(all_max_runs, 1);
+    avg_mean_fit = mean(all_mean_runs, 1);
+
+    % Wykreślanie wyników dla danego m
+    x = 0:lg;
+    plot(x, avg_max_fit, 'LineWidth', 2);
+    plot(x, avg_mean_fit, 'LineWidth', 1);
+
+title("Wyłączone krzyżowanie");
+xlabel("Generacja");
+ylabel("Fitness");
+legend('Location', 'best');
+grid on;
+hold off;
 
 mean_fit_values = []
 max_fit_values = []
+Pi = P0;
 
 for i = 0:lg
 
@@ -44,7 +105,7 @@ for i = 0:lg
     fitness = fit_fun_2_m(Pi_r)
 
     % Umieścić każdego osobnika, każdy punkt na scatterze,
-    plot_3d_population(Pi_r, fitness, s3d);
+    % plot_3d_population(Pi_r, fitness, s3d);
 
     % Selekcja
     disp("Wybrane osobniki");
@@ -68,6 +129,7 @@ x = 0:lg;
 figure
 plot(x, max_fit_values, x, mean_fit_values)
 title("Max fitness values and mean fitness values over generations")
+disp("Początkowa populacja")
 
 
 % Dekodowanie populacji, konwersja wektorów binarnych do wektora liczb dziesiętnych, przeskalowanych do przedziału [a,b]
@@ -213,6 +275,7 @@ function plot_3d_population(decoded_population, fitness, scatter)
     scatter.YData = decoded_population(:,2);
     scatter.ZData = fitness;
 
-    pause(0.2);
+    pause(0.1);
+    
     drawnow limitrate;
 end

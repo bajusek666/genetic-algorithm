@@ -4,11 +4,11 @@
 % Inicjaliacja parametrów 
 
 m = 16; % Liczba osobników
-sub_genomes = [20,20]; % Długość poszczególnych podciągów (kolejnych zmiennych reprezentowanych przez genom)
+sub_genomes = [10,10]; % Długość poszczególnych podciągów (kolejnych zmiennych reprezentowanych przez genom)
 l = sum(sub_genomes);
 pc = 0.7; % prawdopodobieństwo krzyżowania
 pm = 0.01; % Prawdopodobieństwo mutacji bitu
-lg = 200; % Liczba generacji
+lg = 100; % Liczba generacji
 a = 0;
 b = 10;
 
@@ -17,9 +17,9 @@ fit_fun = @(x) x + sin(3 + cos(5 * x)) + 0.8;
 fit_fun_2 = @(x1,x2) ((25 - (x1 - 5)^2 ) * cos(2 * (x1 - 5))) + ((25 - (x2 - 5)^2) * cos(2 * (x2 - 5))) + 50;
 fit_fun_2_m = @(M) ((25 - (M(:,1) - 5).^2 ) .* cos(2 .* (M(:,1) - 5))) + ((25 - (M(:,2) - 5).^2) .* cos(2 .* (M(:,2) - 5))) + 50;
 fit_fun_2_mesh = @(x1,x2) ((25 - (x1 - 5).^2 ) .* cos(2 .* (x1 - 5))) + ((25 - (x2 - 5).^2) .* cos(2 .* (x2 - 5))) + 50;
+
 % Początkowa macierz binarna
-P0 = randi([0,1], m, l)
-Pi = P0;
+P0 = randi([0,1], m, l);
 
 % Rysowaie przestrzeni rozwiązań
 X1 = linspace(0,10,100);
@@ -32,6 +32,7 @@ s3d = scatter3([], [], [], 75, 'filled', 'MarkerFaceColor', 'b', SizeData=200);
 
 mean_fit_values = []
 max_fit_values = []
+Pi = P0;
 
 for i = 0:lg
 
@@ -68,6 +69,7 @@ x = 0:lg;
 figure
 plot(x, max_fit_values, x, mean_fit_values)
 title("Max fitness values and mean fitness values over generations")
+disp("Początkowa populacja")
 
 
 % Dekodowanie populacji, konwersja wektorów binarnych do wektora liczb dziesiętnych, przeskalowanych do przedziału [a,b]
