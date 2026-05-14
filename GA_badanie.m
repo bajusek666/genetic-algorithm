@@ -4,11 +4,11 @@
 % Inicjaliacja parametrów 
 
 m = 16; % Liczba osobników
-sub_genomes = [20,20]; % Długość poszczególnych podciągów (kolejnych zmiennych reprezentowanych przez genom)
+sub_genomes = [10,10]; % Długość poszczególnych podciągów (kolejnych zmiennych reprezentowanych przez genom)
 l = sum(sub_genomes);
 pc = 0.7; % prawdopodobieństwo krzyżowania
 pm = 0.01; % Prawdopodobieństwo mutacji bitu
-lg = 200; % Liczba generacji
+lg = 100; % Liczba generacji
 low = 0;
 high = 10;
 
@@ -22,6 +22,7 @@ ga_params.l = l;
 ga_params.m = m;
 ga_params.mutate = true; 
 ga_params.crossover = true;
+ga_params.population_zeros = false;
 
 % Funckje przystosowania
 fit_fun = @(x) x + sin(3 + cos(5 * x)) + 0.8;
@@ -29,10 +30,6 @@ fit_fun_2 = @(x1,x2) ((25 - (x1 - 5)^2 ) * cos(2 * (x1 - 5))) + ((25 - (x2 - 5)^
 fit_fun_2_m = @(M) ((25 - (M(:,1) - 5).^2 ) .* cos(2 .* (M(:,1) - 5))) + ((25 - (M(:,2) - 5).^2) .* cos(2 .* (M(:,2) - 5))) + 50;
 ga_params.fit_fun_2_m = fit_fun_2_m;
 fit_fun_2_mesh = @(x1,x2) ((25 - (x1 - 5).^2 ) .* cos(2 .* (x1 - 5))) + ((25 - (x2 - 5).^2) .* cos(2 .* (x2 - 5))) + 50;
-
-% Inicjalizacja populacji początkowej macierz binarna, jednakowa populacja początkowa dla każdej
-% iteracji algorytmu
-
 
 % Rysowaie przestrzeni rozwiązań
 % X1 = linspace(0,10,100);
@@ -48,9 +45,10 @@ m_values = [10, 20, 40];
 pc_values = [0.25, 0.5, 0.75, 1];
 pm_values = [0.01, 0.05, 0.001];
 
-num_runs = 30;
-colors = ["r", "g", "b", "w"];
+num_runs = 15;
+colors = ["r", "g", "b", "m"];
 
+% Zmienna ilość osobników
 figure;
 hold on;
 
@@ -78,6 +76,7 @@ legend('show', 'Location', 'best', 'FontSize', 14);
 grid on;
 hold off;
 
+% Zmienne prawdopodobieństwo krzyżowania
 figure;
 hold on;
 
@@ -99,12 +98,14 @@ for idx = 1:length(pc_values)
     plot(x, avg_mean_fit, ':', Color=colors(idx), LineWidth=2, DisplayName=sprintf("Mean (pc = %f)", pc_values(idx)));
 end
 
-title("Max i Mean fitness, zmienne prawdopodobieństwo krzyżowania.");
+title("Max i Mean fitness, zmienne pc, m = 40, pm = 0.01");
 xlabel("Generacja");
 ylabel("Fitness");
 legend('show', 'Location', 'best', 'FontSize', 14);
 grid on;
 hold off;
+
+% Zmienne prawdopodobieństwo mutacji
 
 figure;
 hold on;
@@ -139,6 +140,8 @@ ga_params.m = 40;
 ga_params.pc = 0.5;
 ga_params.pm = 0.01;
 
+% Wpływ obecności operatorów na algorytm, losowa populacja początkowa
+
 %Pierwsza kolumna: Krzyżowanie
 %Druga kolumna: Mutacja
 combinations = [true, true; false, true; true, false; false, false];
@@ -172,6 +175,37 @@ legend('show', 'Location', 'best', 'FontSize', 14);
 grid on;
 hold off;
 
+% Wpływ obecności operatorów na algorytm, zerowa populacja początkowa
+ga_params.population_zeros = true;
+
+figure;
+hold on;
+
+for idx = 1:length(combinations)
+
+    ga_params.crossover = combinations(idx, 1);
+    ga_params.mutate = combinations(idx, 2);
+
+    for run = 1:num_runs
+        [current_max, current_mean] = ga_main_loop(ga_params);
+        all_max_runs(run, :) = current_max;
+        all_mean_runs(run, :) = current_mean;
+    end
+
+    avg_max_fit = mean(all_max_runs, 1);
+    avg_mean_fit = mean(all_mean_runs, 1);
+
+    x = 0:ga_params.lg;
+    plot(x, avg_max_fit, Color=colors(idx), LineWidth=2, DisplayName=sprintf("Max (Krzyżowanie: %d, Mutacja: %d)", combinations(idx, 1), combinations(idx,2)));
+    plot(x, avg_mean_fit, ':', Color=colors(idx), LineWidth=2, DisplayName=sprintf("Mean (Krzyżowanie: %d, Mutacja: %d)", combinations(idx, 1), combinations(idx,2)));
+end
+
+title("Max i Mean fitness, zmienna obecność operatorów, zerowa populacja początkowa");
+xlabel("Generacja");
+ylabel("Fitness");
+legend('show', 'Location', 'best', 'FontSize', 14);
+grid on;
+hold off;
 
 % Dekodowanie populacji, konwersja wektorów binarnych do wektora liczb dziesiętnych, przeskalowanych do przedziału [low,high]
 function xr_vector = decode_population(binary_population, low, high)
@@ -323,7 +357,11 @@ end
 % Przyjmuje strukturę z parametrami aglorytmu GA
 function [max_fit_values, mean_fit_values] = ga_main_loop(ga_params)
 
-    Pi = create_initial_population(ga_params.m, ga_params.l);
+    if(ga_params.population_zeros)
+        Pi = zeros(ga_params.m, ga_params.l);
+    else
+        Pi = create_initial_population(ga_params.m, ga_params.l);
+    end
     low = ga_params.low;
     high = ga_params.high;
     sub_genomes = ga_params.sub_genomes;
